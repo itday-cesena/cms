@@ -22,7 +22,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import argparse
-from contextlib import closing
 import errno
 import grp
 import itertools
@@ -40,6 +39,7 @@ import gevent
 import gevent.socket
 
 from cms import Address, ServiceCoord, ConfigError, async_config, config
+from cms.conf import EphemeralServiceConfig
 
 
 logger = logging.getLogger(__name__)
@@ -150,10 +150,7 @@ def get_safe_shard(service, provided_shard):
         for addr in addrs:
             addr = ipaddress.ip_address(addr[1])
             if addr in ephemeral_config.subnet:
-                port = find_open_port(
-                    str(addr),
-                    ephemeral_config.min_port,
-                    ephemeral_config.max_port)
+                port = ephemeral_config.find_free_port(addr)
                 shard = ephemeral_config.get_shard(addr, port)
                 return shard
     if provided_shard is None:
@@ -176,18 +173,14 @@ def get_safe_shard(service, provided_shard):
             return provided_shard
 
 
-def find_open_port(address, minport, maxport):
-    """Find the first open port in the specified range for the address.
+def is_shard_ephemeral(shard):
+    """Checks if the shard is ephemeral.
+
+    shard (int): the shard to check.
+
+    return (bool): True if the shard is ephemeral.
     """
-    for port in range(minport, maxport+1):
-        with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as sock:
-            try:
-                sock.bind((address, port))
-                return port
-            except socket.error:
-                continue
-    raise ValueError("No free port found in range [%s, %s] "
-                     "for address %s" % (minport, maxport, address))
+    return shard >= EphemeralServiceConfig.EPHEMERAL_SHARD_OFFSET
 
 
 def get_service_address(key):
