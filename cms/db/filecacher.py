@@ -339,7 +339,7 @@ class DBBackend(FileCacherBackend):
             else:
                 # Create the large object first. This should be populated
                 # and committed before putting it into the FSObjects table.
-                return LargeObject(0, mode='wb')
+                return LargeObject(0, mode='wb').buffered()
 
     def commit_file(self, fobj, digest, desc=""):
         """See FileCacherBackend.commit_file().
@@ -350,7 +350,7 @@ class DBBackend(FileCacherBackend):
             with SessionGen() as session:
                 fso = FSObject(description=desc)
                 fso.digest = digest
-                fso.loid = fobj.loid
+                fso.loid = fobj.raw.loid
 
                 session.add(fso)
 
