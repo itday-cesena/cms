@@ -58,6 +58,7 @@ class CSharpMono(Language):
                                  for_evaluation=True):
         """See Language.get_compilation_commands."""
         compile_command = ["/usr/bin/mcs",
+                           "-define:EVAL",
                            "-out:" + executable_filename,
                            "-optimize+"]
         compile_command += source_filenames
