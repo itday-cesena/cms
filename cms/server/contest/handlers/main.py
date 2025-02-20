@@ -119,6 +119,9 @@ class RegistrationHandler(ContestHandler):
 
         self.sql_session.commit()
 
+        # Create the user in RWS
+        self.service.proxy_service.reinitialize()
+
         self.finish(user.username)
 
     @multi_contest
