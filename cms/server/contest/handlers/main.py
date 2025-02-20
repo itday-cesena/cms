@@ -113,9 +113,8 @@ class RegistrationHandler(ContestHandler):
                 raise tornado_web.HTTPError(409)
 
         # Create participation
-        team = self._get_team()
         participation = Participation(user=user, contest=self.contest,
-                                      team=team)
+                                      team=None)
         self.sql_session.add(participation)
 
         self.sql_session.commit()
@@ -129,8 +128,6 @@ class RegistrationHandler(ContestHandler):
 
         self.r_params["MAX_INPUT_LENGTH"] = self.MAX_INPUT_LENGTH
         self.r_params["MIN_PASSWORD_LENGTH"] = self.MIN_PASSWORD_LENGTH
-        self.r_params["teams"] = self.sql_session.query(Team)\
-                                     .order_by(Team.name).all()
 
         self.render("register.html", **self.r_params)
 
@@ -190,21 +187,6 @@ class RegistrationHandler(ContestHandler):
             raise tornado_web.HTTPError(403)
 
         return user
-
-    def _get_team(self):
-        # If we have teams, we assume that the 'team' field is mandatory
-        if self.sql_session.query(Team).count() > 0:
-            try:
-                team_code = self.get_argument("team")
-                team = self.sql_session.query(Team)\
-                           .filter(Team.code == team_code)\
-                           .one()
-            except (tornado_web.MissingArgumentError, NoResultFound):
-                raise tornado_web.HTTPError(400)
-        else:
-            team = None
-
-        return team
 
 
 class LoginHandler(ContestHandler):

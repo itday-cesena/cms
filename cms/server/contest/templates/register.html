@@ -142,19 +142,6 @@ $(document).ready(function() {
                             <input minlength="0" maxlength="{{ MAX_INPUT_LENGTH }}" type="text" class="input-xlarge" name="email" id="email" autocomplete="email">
                         </div>
                     </div>
-
-                    {% if teams|length > 0 %}
-                    <div class="control-group">
-                        <label class="control-label" for="team">{% trans %}Representing{% endtrans %}</label>
-                        <div class="controls">
-                            <select id="team" name="team">
-                                {% for t in teams %}
-                                <option value="{{ t.code }}">{{ t.name }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                    </div>
-                    {% endif %}
                 </div>
 
                 <hr id="form-divider">
